@@ -1,18 +1,21 @@
-%%writefile app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-# 1. Judul & Pengaturan Aplikasi di Web Dashboard
+# ==============================================================================
+# 1. PENGATURAN HALAMAN DASHBOARD UTAMA
+# ==============================================================================
 st.set_page_config(page_title="SPK Diskon Retail", layout="wide")
 st.title("📊 Dashboard SPK Hibrid: Prioritas Diskon Produk Kedaluwarsa (K-Means + SAW)")
 st.write("Sistem Pendukung Keputusan Berbasis Cloud Environment - Manajemen Ritel")
 
 st.markdown("---")
 
-# 2. FITUR IMPORT/UPLOAD CSV (Sama seperti fungsi tombol Import di Kelompok Teman Anda)
+# ==============================================================================
+# 2. FITUR IMPORT/UPLOAD CSV (Mendukung Dynamic Upload di Cloud)
+# ==============================================================================
 st.subheader("📥 Lapisan Data: Import Dataset Ritel")
 uploaded_file = st.file_uploader("Upload File 'SuperMarket Analysis.csv' di sini", type=["csv"])
 
@@ -25,18 +28,25 @@ if uploaded_file is not None:
     st.write("### Preview Data Awal:")
     st.dataframe(df_raw[["Invoice ID", "Product line", "Unit price", "Quantity", "Sales"]].head())
     
+    # ==============================================================================
     # 3. PROSES INJEKSI SIMULASI GUDANG (Data Preprocessing)
+    # ==============================================================================
     np.random.seed(42)
     df_enriched = df_raw.copy()
     df_enriched['stok_tersisa'] = np.random.randint(15, 120, size=len(df_enriched))
     df_enriched['sisa_hari_expired'] = np.random.randint(1, 90, size=len(df_enriched))
     
+    # ==============================================================================
     # 4. ENGINE 1: DATA-DRIVEN (K-MEANS CLUSTERING)
+    # ==============================================================================
     X = df_enriched[['Quantity']].values
-    kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+    # Menggunakan n_init='auto' untuk mencegah warning log di server cloud
+    kmeans = KMeans(n_clusters=3, random_state=42, n_init='auto')
     df_enriched['cluster_kelarisan'] = kmeans.fit_predict(X)
     
+    # ==============================================================================
     # 5. ENGINE 2: MODEL-DRIVEN (SAW)
+    # ==============================================================================
     slow_moving_cluster = df_enriched.groupby('cluster_kelarisan')['Quantity'].mean().idxmin()
     df_slow_moving = df_enriched[df_enriched['cluster_kelarisan'] == slow_moving_cluster].copy()
     
@@ -46,7 +56,9 @@ if uploaded_file is not None:
     df_slow_moving['R_stok'] = df_slow_moving['stok_tersisa'] / max_stok
     df_slow_moving['R_expired'] = min_expired / df_slow_moving['sisa_hari_expired']
     
-    # 6. INTERACTIVE SLIDER: Fitur Premium agar User bisa Atur Bobot Sendiri di UI!
+    # ==============================================================================
+    # 6. INTERACTIVE SLIDER: Fitur Dinamis Atur Bobot Manajemen
+    # ==============================================================================
     st.markdown("---")
     st.subheader("⚙️ Aturan Manajemen: Pengaturan Bobot SPK")
     bobot_expired = st.slider("Bobot Kriteria Sisa Hari Kedaluwarsa (Cost)", 0.0, 1.0, 0.65, 0.05)
@@ -59,7 +71,9 @@ if uploaded_file is not None:
     # Agregasi Hasil Rekomendasi Global per Lini Produk
     hasil_global = df_slow_moving.groupby('Product line')[['stok_tersisa', 'sisa_hari_expired', 'Skor_Prioritas_Diskon']].mean().sort_values(by='Skor_Prioritas_Diskon', ascending=False).reset_index()
     
+    # ==============================================================================
     # 7. TAMPILAN OUTPUT SPK (Visualisasi Real-time)
+    # ==============================================================================
     st.markdown("---")
     st.subheader("🎯 Output SPK: Rekomendasi Utama Program Diskon Toko")
     
@@ -71,10 +85,12 @@ if uploaded_file is not None:
         
     with col2:
         st.write("### Grafik Distribusi Prioritas:")
+        # Membuat objek figure dan axis secara eksplisit untuk mencegah overhead memori server
         fig, ax = plt.subplots(figsize=(8, 4.5))
         ax.bar(hasil_global['Product line'], hasil_global['Skor_Prioritas_Diskon'], color='teal')
         ax.set_ylabel('Skor Prioritas Diskon (V)')
-        plt.xticks(rotation=15)
+        ax.set_xticklabels(hasil_global['Product line'], rotation=15, ha='right')
+        # Merender plot ke dalam dashboard Streamlit Cloud
         st.pyplot(fig)
 
 else:
