@@ -8,7 +8,7 @@ from sklearn.cluster import KMeans
 # 1. PENGATURAN HALAMAN DASHBOARD UTAMA
 # ==============================================================================
 st.set_page_config(page_title="SPK Diskon Retail", layout="wide")
-st.title("📊 Dashboard SPK Hibrid: Prioritas Diskon Produk Kedaluwarsa (K-Means + SAW)")
+st.title("Dashboard SPK Hibrid: Prioritas Diskon Produk Kedaluwarsa (K-Means + SAW)")
 st.write("Sistem Pendukung Keputusan Berbasis Cloud Environment - Manajemen Ritel")
 
 st.markdown("---")
@@ -16,7 +16,7 @@ st.markdown("---")
 # ==============================================================================
 # 2. FITUR IMPORT/UPLOAD CSV (Mendukung Dynamic Upload di Cloud)
 # ==============================================================================
-st.subheader("📥 Lapisan Data: Import Dataset Ritel")
+st.subheader("Lapisan Data: Import Dataset Ritel")
 uploaded_file = st.file_uploader("Upload File 'SuperMarket Analysis.csv' di sini", type=["csv"])
 
 if uploaded_file is not None:
@@ -75,7 +75,7 @@ if uploaded_file is not None:
     # 7. TAMPILAN OUTPUT SPK (Visualisasi Real-time)
     # ==============================================================================
     st.markdown("---")
-    st.subheader("🎯 Output SPK: Rekomendasi Utama Program Diskon Toko")
+    st.subheader("Output SPK: Rekomendasi Utama Program Diskon Toko")
     
     col1, col2 = st.columns([1, 1])
     
@@ -94,4 +94,4 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
 else:
-    st.warning("⚠️ Silakan import/upload file 'SuperMarket Analysis.csv' terlebih dahulu untuk menjalankan sistem hibrid.")
+    st.warning("Silakan import/upload file 'SuperMarket Analysis.csv' terlebih dahulu untuk menjalankan sistem hibrid.")
