@@ -6,20 +6,20 @@ from sklearn.cluster import KMeans
 
 # 1. PENGATURAN HALAMAN DASHBOARD UTAMA
 st.set_page_config(page_title="SPK Diskon Retail", layout="wide")
-st.title("📊 Dashboard SPK Hibrid: Klasifikasi Produk Kedaluwarsa dan Prioritas Penjualan (Diskon)")
+st.title("Dashboard SPK Hibrid: Klasifikasi Produk Kedaluwarsa dan Prioritas Penjualan (Diskon)")
 st.write("Sistem Penunjang Keputusan Berbasis Cloud Environment - Manajemen Ritel")
 
 st.markdown("---")
 
 # 2. FITUR IMPORT/UPLOAD CSV
-st.subheader("📥 Lapisan Data: Import Dataset Ritel")
+st.subheader("Lapisan Data: Import Dataset Ritel")
 uploaded_file = st.file_uploader("Upload File 'SuperMarket Analysis.csv' di sini", type=["csv"])
 
 if uploaded_file is not None:
     df_base = pd.read_csv(uploaded_file)
     
     # ==============================================================================
-    # 🌟 TRIK BIG DATA: EKSPANSI DATA OTOMATIS MENJADI > 1000 BARIS
+    # EKSPANSI DATA OTOMATIS MENJADI > 1000 BARIS
     # ==============================================================================
     # Menduplikasi data asli sebanyak 3 kali agar volume data mencapai 3.000 baris
     df_raw = pd.concat([df_base, df_base, df_base], ignore_index=True)
@@ -56,7 +56,7 @@ if uploaded_file is not None:
     
     # 6. INTERACTIVE SLIDER: Pengaturan Bobot Dinamis
     st.markdown("---")
-    st.subheader("⚙️ Aturan Manajemen: Pengaturan Bobot SPK")
+    st.subheader("Aturan Manajemen: Pengaturan Bobot SPK")
     bobot_expired = st.slider("Bobot Kriteria Sisa Hari Kedaluwarsa (Cost)", 0.0, 1.0, 0.65, 0.05)
     bobot_stok = 1.0 - bobot_expired
     st.info(f"Maka Otomatis Bobot Volume Stok Gudang (Benefit) adalah: {bobot_stok:.2f}")
@@ -67,7 +67,7 @@ if uploaded_file is not None:
     
     # 7. TAMPILAN OUTPUT SPK
     st.markdown("---")
-    st.subheader("🎯 Output SPK: Rekomendasi Utama Program Diskon Toko")
+    st.subheader("Output SPK: Rekomendasi Utama Program Diskon Toko")
     col1, col2 = st.columns([1, 1])
     with col1:
         st.write("### Tabel Ranking Kategori Produk:")
@@ -80,4 +80,4 @@ if uploaded_file is not None:
         ax.set_xticklabels(hasil_global['Product line'], rotation=15, ha='right')
         st.pyplot(fig)
 else:
-    st.warning("⚠️ Silakan import/upload file 'SuperMarket Analysis.csv' terlebih dahulu untuk menjalankan sistem hibrid.")
+    st.warning("Silakan import/upload file 'SuperMarket Analysis.csv' terlebih dahulu untuk menjalankan sistem hibrid.")
