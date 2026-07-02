@@ -10,24 +10,38 @@ from sklearn.cluster import KMeans
 st.set_page_config(page_title="SPK Diskon Retail", layout="wide")
 
 # ==============================================================================
-# 2. MENU DI SEBELAH KIRI (SIDEBAR DASHBOARD)
+# 2. MENU DI SEBELAH KIRI (SIDEBAR DASHBOARD - DOKUMENTASI ILMIAH)
 # ==============================================================================
 st.sidebar.title("ℹ️ Informasi & Navigasi")
 
-# Penjelasan Dokumentasi Sistem
+# Penjelasan Dokumentasi Sistem (Versi Panjang & Ilmiah)
 st.sidebar.markdown("### 📌 Tentang Sistem")
 st.sidebar.info(
-    "Sistem Penunjang Keputusan (SPK) ini mengintegrasikan metode **K-Means Clustering** "
-    "(Data-Driven) untuk memfilter produk *slow-moving*, dan metode **SAW** (Model-Driven) "
-    "untuk menentukan prioritas diskon toko secara objektif."
+    "Sistem Penunjang Keputusan (SPK) ini mengadopsi pendekatan arsitektur hibrid "
+    "yang menggabungkan dua paradigma komputasi:\n\n"
+    "1. **Fase Data-Driven (K-Means Clustering):** Berfungsi sebagai filter awal pada "
+    "lapisan basis data untuk mengelompokkan tingkat kelarisan produk secara objektif. "
+    "Algoritma ini mengisolasi produk kategori *slow-moving* berdasarkan pola kuantitas penjualan "
+    "historis, sehingga meminimalkan subjektivitas manajerial.\n\n"
+    "2. **Fase Model-Driven (Simple Additive Weighting - SAW):** Berfungsi sebagai mesin penentu "
+    "kebijakan taktis. Metode ini menormalisasi matriks kriteria multi-objektif (sisa volume stok "
+    "gudang dan sisa hari aktif kedaluwarsa) untuk menghasilkan bobot preferensi keputusan "
+    "secara presisi dan real-time."
 )
 
-# Penjelasan Dataset Resmi
+# Penjelasan Dataset Resmi (Versi Panjang & Eksplisit)
 st.sidebar.markdown("### 📊 Metadata Dataset")
 st.sidebar.success(
-    "**Nama Berkas:** SuperMarket Analysis.csv\n\n"
-    "**Ukuran Sampel:** 1.000 Baris Transaksi Asli (Direplikasi otomatis oleh sistem menjadi 3.000 baris untuk simulasi Big Data).\n\n"
-    "**Karakteristik Atribut:** Memuat 17 kolom utama termasuk ID Transaksi, Cabang, Kategori Produk, Harga Satuan, dan Kuantitas Penjualan."
+    "**Spesifikasi Teknis Data:**\n\n"
+    "* **Nama Berkas Asal:** SuperMarket Analysis.csv\n"
+    "* **Volume Sampel Historis:** 1.000 baris transaksi awal yang memuat data terstruktur.\n"
+    "* **Mekanisme Replikasi Big Data:** Sistem mengimplementasikan fungsi ekspansi virtual simultan "
+    "dengan menggandakan data sebesar 300% (mencapai total **3.000 baris transaksi**) guna memenuhi "
+    "syarat batas pengujian komputasi massal lingkungan cloud.\n"
+    "* **Karakteristik Atribut:** Terdiri atas 17 dimensi kolom (Atribut kunci: *Invoice ID*, *Product line*, "
+    "*Unit price*, *Quantity*, dan *Sales*). Parameter logistik pendukung diinjeksi menggunakan metode "
+    "konformitas *Pseudo-Random Seed 42* untuk pemodelan sisa stok gudang (15–120 unit) dan sisa hari "
+    "kedaluwarsa (1–90 hari)."
 )
 
 # Informasi Pengembang / Mahasiswa
@@ -121,10 +135,21 @@ if uploaded_file is not None:
         ax.set_xticklabels(hasil_global['Product line'], rotation=15, ha='right')
         st.pyplot(fig)
         
-    st.caption("""
-        **Keterangan Interpretasi Output:**
-        * **Skor Prioritas ($V_i$):** Dihitung menggunakan metode SAW setelah melalui proses penyaringan kluster *Slow-Moving* oleh K-Means.
-        * **Nilai Tertinggi:** Menunjukkan kategori produk yang paling mendesak untuk diberikan potongan harga berdasarkan kombinasi stok gudang yang tinggi dan sisa hari aktif kedaluwarsa yang paling kritis.
-    """)
+    # Interpretasi Terstruktur dan Analisis Panjang
+    st.markdown("---")
+    st.subheader("💡 Interpretasi dan Analisis Logika Keputusan")
+    st.info(
+        "**Panduan Operasional Komputasi Akhir ($V_i$):**\n\n"
+        "1. **Mekanisme Perangkingan:** Nilai skor preferensi akhir berkisar antara 0.0 hingga 1.0. "
+        "Semakin tinggi nilai skor akumulasi komputasi ($V_i$) yang diperoleh oleh suatu kelompok lini produk, "
+        "maka semakin kritis status urgensi logistik kelompok tersebut di dalam gudang.\n\n"
+        "2. **Kombinasi Parameter Kritis:** Skor tertinggi didapatkan dari hasil perpaduan kondisi di mana "
+        "kriteria *Benefit* (Volume Sisa Stok Gudang) bernilai maksimal, yang berjalan beriringan dengan kondisi "
+        "kriteria *Cost* (Sisa Hari Aktif Menuju Kedaluwarsa) yang bernilai minimal atau sangat mendesak.\n\n"
+        "3. **Rekomendasi Aksi Manajerial:** Kelompok dengan peringkat teratas otomatis direkomendasikan "
+        "kepada jajaran manajemen ritel swalayan sebagai target utama eksekusi program promosi potongan harga "
+        "(diskon global) untuk mempercepat perputaran arus kas toko sekaligus menekan kerugian finansial akibat "
+        "barang kedaluwarsa."
+)
 else:
     st.warning("Silakan import/upload file 'SuperMarket Analysis.csv' terlebih dahulu untuk menjalankan sistem hibrid.")
