@@ -12,21 +12,64 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Dashboard SPK Hibrid: Klasifikasi Produk Kedaluwarsa dan Prioritas Penjualan (Diskon)")
-st.write("Sistem Penunjang Keputusan Berbasis Cloud Environment - Manajemen Ritel")
+# ==============================================================================
+# SIDEBAR
+# ==============================================================================
+st.sidebar.title("ℹ️ Informasi & Navigasi")
+
+st.sidebar.markdown("### 📌 Tentang Sistem")
+st.sidebar.info(
+    "Sistem Penunjang Keputusan (SPK) ini mengadopsi pendekatan arsitektur hibrid "
+    "yang menggabungkan dua paradigma komputasi:\n\n"
+    "1. **Data-Driven (K-Means Clustering)** untuk mengidentifikasi produk slow-moving.\n\n"
+    "2. **Model-Driven (Simple Additive Weighting / SAW)** untuk menentukan prioritas diskon "
+    "berdasarkan stok dan masa kedaluwarsa."
+)
+
+st.sidebar.markdown("### 📊 Metadata Dataset")
+st.sidebar.success(
+    "**Dataset:** SuperMarket Analysis.csv\n\n"
+    "- Dataset awal ±1000 transaksi\n"
+    "- Diekspansi menjadi ±3000 transaksi\n"
+    "- Simulasi stok gudang dan expired menggunakan Seed 42\n"
+    "- Digunakan untuk pengujian SPK berbasis cloud"
+)
+
+st.sidebar.markdown("### 🎓 Identitas Peneliti")
+st.sidebar.warning(
+    "**Nama:** Asep Syahrudin\n\n"
+    "**NPM:** 065123040\n\n"
+    "**Program Studi:** Ilmu Komputer\n\n"
+    "**Universitas:** Universitas Pakuan\n\n"
+    "**Dosen:** Dr. Eneng Tita Rosida, S.Tp., M.Si., M.Kom."
+)
+
+# ==============================================================================
+# HEADER
+# ==============================================================================
+st.title(
+    "Dashboard SPK Hibrid: Klasifikasi Produk Kedaluwarsa dan Prioritas Penjualan (Diskon)"
+)
+
+st.write(
+    "Sistem Penunjang Keputusan Berbasis Cloud Environment - Manajemen Ritel"
+)
 
 st.markdown("---")
 
 # ==============================================================================
-# IMPORT DATASET
+# UPLOAD DATA
 # ==============================================================================
-st.subheader("Lapisan Data: Import Dataset Ritel")
+st.subheader("📂 Lapisan Data: Import Dataset Ritel")
 
 uploaded_file = st.file_uploader(
-    "Upload File 'SuperMarket Analysis.csv' di sini",
+    "Upload File SuperMarket Analysis.csv",
     type=["csv"]
 )
 
+# ==============================================================================
+# PROSES UTAMA
+# ==============================================================================
 if uploaded_file is not None:
 
     df_base = pd.read_csv(uploaded_file)
@@ -46,14 +89,18 @@ if uploaded_file is not None:
 
     st.success(
         f"✅ Big Data Berhasil Di-import! "
-        f"Sistem mendeteksi total: {len(df_raw)} Baris Transaksi "
-        f"(Persyaratan > 1000 Baris Terpenuhi)."
+        f"Sistem mendeteksi total {len(df_raw)} transaksi."
+    )
+
+    st.info(
+        "💡 Data stok gudang dan sisa hari expired "
+        "disimulasikan menggunakan Pseudo-Random Seed 42."
     )
 
     # ==========================================================================
     # KPI DASHBOARD
     # ==========================================================================
-    st.markdown("## Ringkasan Data")
+    st.markdown("## 📊 Ringkasan Statistik Big Data")
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -86,7 +133,7 @@ if uploaded_file is not None:
     # ==========================================================================
     st.markdown("---")
 
-    st.subheader("Preview Big Data Transaksi")
+    st.subheader("📄 Preview Dataset")
 
     st.dataframe(
         df_raw[
@@ -120,7 +167,7 @@ if uploaded_file is not None:
     )
 
     # ==========================================================================
-    # K-MEANS CLUSTERING
+    # ENGINE 1 : K-MEANS
     # ==========================================================================
     X = df_enriched[['Quantity']].values
 
@@ -133,7 +180,7 @@ if uploaded_file is not None:
     df_enriched['cluster_kelarisan'] = kmeans.fit_predict(X)
 
     st.markdown("---")
-    st.subheader("Engine 1 : K-Means Clustering")
+    st.subheader("📌 Engine 1 : K-Means Clustering")
 
     cluster_summary = (
         df_enriched
@@ -143,9 +190,9 @@ if uploaded_file is not None:
     )
 
     cluster_summary.columns = [
-        'Cluster',
-        'Jumlah Data',
-        'Rata-rata Quantity'
+        "Cluster",
+        "Jumlah Data",
+        "Rata-rata Quantity"
     ]
 
     st.dataframe(cluster_summary)
@@ -157,15 +204,18 @@ if uploaded_file is not None:
 
     fig_cluster, ax_cluster = plt.subplots(figsize=(8, 4))
 
-    scatter = ax_cluster.scatter(
+    ax_cluster.scatter(
         df_enriched.index,
         df_enriched['Quantity'],
         c=df_enriched['cluster_kelarisan']
     )
 
+    ax_cluster.set_title(
+        "Distribusi Hasil K-Means Clustering"
+    )
+
     ax_cluster.set_xlabel("Index Data")
     ax_cluster.set_ylabel("Quantity")
-    ax_cluster.set_title("Distribusi Cluster K-Means")
 
     st.pyplot(fig_cluster)
 
@@ -188,9 +238,10 @@ if uploaded_file is not None:
     )
 
     st.markdown("---")
-    st.subheader("Produk Slow Moving")
 
-    st.info(
+    st.subheader("🚚 Identifikasi Slow Moving Product")
+
+    st.success(
         f"Cluster Slow Moving yang terdeteksi: "
         f"Cluster {slow_moving_cluster}"
     )
@@ -207,7 +258,7 @@ if uploaded_file is not None:
     )
 
     # ==========================================================================
-    # SAW
+    # NORMALISASI SAW
     # ==========================================================================
     max_stok = df_slow_moving['stok_tersisa'].max()
     min_expired = df_slow_moving['sisa_hari_expired'].min()
@@ -223,11 +274,11 @@ if uploaded_file is not None:
     )
 
     # ==========================================================================
-    # SLIDER BOBOT
+    # BOBOT DINAMIS
     # ==========================================================================
     st.markdown("---")
 
-    st.subheader("Engine 2 : Pengaturan Bobot SAW")
+    st.subheader("⚙️ Engine 2 : Pengaturan Bobot SAW")
 
     bobot_expired = st.slider(
         "Bobot Kriteria Sisa Hari Kedaluwarsa (Cost)",
@@ -240,7 +291,7 @@ if uploaded_file is not None:
     bobot_stok = 1.0 - bobot_expired
 
     st.info(
-        f"Bobot Stok Gudang (Benefit) Otomatis = "
+        f"Bobot Volume Stok Gudang (Benefit): "
         f"{bobot_stok:.2f}"
     )
 
@@ -282,7 +333,7 @@ if uploaded_file is not None:
         f"""
         🎯 PRIORITAS UTAMA PROGRAM DISKON
 
-        Produk : {top_produk['Product line']}
+        Product Line : {top_produk['Product line']}
 
         Skor Prioritas :
         {top_produk['Skor_Prioritas_Diskon']:.4f}
@@ -292,8 +343,10 @@ if uploaded_file is not None:
     # ==========================================================================
     # OUTPUT SPK
     # ==========================================================================
+    st.markdown("---")
+
     st.subheader(
-        "Output SPK : Rekomendasi Program Diskon"
+        "📈 Output SPK: Rekomendasi Program Diskon"
     )
 
     col1, col2 = st.columns(2)
@@ -307,8 +360,8 @@ if uploaded_file is not None:
         csv = hasil_global.to_csv(index=False)
 
         st.download_button(
-            "⬇ Download Hasil Ranking",
-            csv,
+            label="⬇ Download Hasil Ranking",
+            data=csv,
             file_name="hasil_ranking_spk.csv",
             mime="text/csv"
         )
@@ -321,25 +374,38 @@ if uploaded_file is not None:
 
         ax.bar(
             hasil_global['Product line'],
-            hasil_global['Skor_Prioritas_Diskon']
+            hasil_global['Skor_Prioritas_Diskon'],
+            color='teal'
         )
 
         ax.set_ylabel(
             "Skor Prioritas Diskon (V)"
         )
 
-        ax.set_xticklabels(
-            hasil_global['Product line'],
+        plt.xticks(
             rotation=15,
             ha='right'
         )
 
         st.pyplot(fig)
 
+    # ==========================================================================
+    # INTERPRETASI HASIL
+    # ==========================================================================
+    st.markdown("---")
+
+    st.subheader("💡 Interpretasi dan Analisis Keputusan")
+
+    st.info(
+        "Semakin tinggi skor prioritas diskon (Vi), semakin tinggi urgensi "
+        "produk untuk masuk program diskon. Nilai tinggi diperoleh dari "
+        "kombinasi stok gudang yang besar dan masa kedaluwarsa yang semakin dekat. "
+        "Produk dengan skor tertinggi direkomendasikan sebagai prioritas utama "
+        "program promosi guna mengurangi risiko kerugian akibat barang kedaluwarsa."
+    )
+
 else:
 
     st.warning(
-        "Silakan upload file "
-        "'SuperMarket Analysis.csv' "
-        "terlebih dahulu."
+        "Silakan upload file 'SuperMarket Analysis.csv' terlebih dahulu."
     )
