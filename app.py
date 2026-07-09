@@ -81,7 +81,7 @@ if uploaded_file is not None:
     st.info("💡 **Informasi Dataset:** Data logistik pendukung (Stok & Sisa Hari Expired) disimulasikan menggunakan metode Pseudo-Random berbasis Seed 42 untuk menjaga konsistensi nilai saat pengujian.")
     
     # Menampilkan 5 Data Teratas Hasil Import
-    st.write("### Preview Tabel Big Data Transaksi (3.000 Baris terintegrasi):")
+    st.write("### Preview Tabel Data Transaksi:")
     st.dataframe(df_raw[["Invoice ID", "Product line", "Unit price", "Quantity", "Sales"]].head())
     
     # 4. PROSES INJEKSI SIMULASI GUDANG (Data Preprocessing)
